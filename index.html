@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#05070a">
     <title>SubAuditor</title>
-    <link rel="manifest" href="/manifest.json">
+    
+    <link rel="manifest" href="manifest.json">
+    
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -23,12 +25,10 @@
         .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .pill-btn { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 8px 16px; font-size: 0.75rem; font-weight: 700; color: var(--accent); cursor: pointer; }
 
-        /* Progress Bar */
         .budget-card { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 15px; margin-bottom: 20px; }
         .progress-track { width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; margin-top: 10px; }
         #budgetFill { height: 100%; width: 0%; background: var(--accent); transition: 1s; }
 
-        /* Tabs */
         .tab-box { display: flex; gap: 10px; margin-bottom: 20px; background: rgba(255,255,255,0.03); padding: 5px; border-radius: 15px; }
         .tab { flex: 1; padding: 12px; text-align: center; border-radius: 12px; font-size: 0.8rem; font-weight: 700; cursor: pointer; color: var(--dim); }
         .tab.active { background: var(--accent); color: #000; }
@@ -70,10 +70,12 @@
     <div class="overlay" id="mainMenu">
         <a href="#" onclick="showOverlay('rewardsModal')">Rewards Vault</a>
         <a href="https://www.instagram.com/tightarsesofmelbourne/" target="_blank">Melbourne Deals</a>
-        <div style="margin-top: 20px;">
-            <label style="font-size: 0.6rem; color: var(--dim);">MONTHLY BUDGET</label>
+        
+        <div style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px;">
+            <label style="font-size: 0.6rem; color: var(--dim);">MONTHLY BUDGET ($)</label>
             <input type="number" id="setBudget" onchange="updateBudgetLimit()" style="margin-top:10px;">
         </div>
+
         <a href="#" onclick="clearAll()" style="color:var(--danger); margin-top: auto;">System Wipe</a>
         <button onclick="closeOverlay('mainMenu')" style="margin-top:20px; padding:15px; border-radius:15px;">CLOSE</button>
     </div>
@@ -134,7 +136,6 @@
         document.getElementById('itemDate').valueAsDate = new Date();
         document.getElementById('setBudget').value = budgetLimit;
 
-        // Auto Reset Monthly
         const currentMonth = `${new Date().getFullYear()}-${new Date().getMonth()}`;
         if (lastReset !== currentMonth) {
             expenses = expenses.filter(i => i.isSub === true);
@@ -143,9 +144,7 @@
 
         function showOverlay(id) { document.getElementById(id).classList.add('active'); }
         function closeOverlay(id) { document.getElementById(id).classList.remove('active'); }
-
         function setCur(l, r, s) { rate = r; sym = s; document.getElementById('curBtn').innerText = `${l} (${s})`; closeOverlay('curOverlay'); render(); }
-
         function updateBudgetLimit() { budgetLimit = document.getElementById('setBudget').value; localStorage.setItem('sub_final_budget', budgetLimit); render(); }
 
         function switchTab(t) {
@@ -181,7 +180,7 @@
             let filtered = expenses.filter(item => (currentTab === 'subs' ? item.isSub : !item.isSub));
             if (currentTab === 'subs') filtered.sort((a, b) => getDaysLeft(a.d) - getDaysLeft(b.d));
 
-            filtered.forEach((item, i) => {
+            filtered.forEach((item) => {
                 dTotal += item.p;
                 const badge = item.isSub ? `<span class="days-badge">${getDaysLeft(item.d)}d Left</span>` : '';
                 list.innerHTML += `<div class="entry"><div><b>${item.n}</b><br><small style="color:var(--dim)">${item.d} • ${item.c}</small></div><div style="display:flex;align-items:center;">${badge}<span class="price">${sym}${(item.p * rate).toFixed(2)}</span><span style="color:var(--danger);margin-left:15px;cursor:pointer;" onclick="deleteItem('${item.n}',${item.p})">×</span></div></div>`;
