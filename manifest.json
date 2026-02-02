@@ -1,0 +1,11 @@
+{
+  "background_color": "#05070a",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "subauditor",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "subauditor",
+  "start_url": "/",
+  "theme_color": "#05070a"
+}
