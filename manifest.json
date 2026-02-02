@@ -1,8 +1,10 @@
 {
   "name": "SubAuditor",
   "short_name": "SubAuditor",
+  "description": "Aussie subscription and spending auditor.",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#05070a",
   "theme_color": "#05070a",
   "icons": [
@@ -10,7 +12,13 @@
       "src": "icon.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
