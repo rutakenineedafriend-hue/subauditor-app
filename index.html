@@ -37,6 +37,9 @@
         .row { display: flex; gap: 10px; margin-bottom: 10px; }
         input, select { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); padding: 14px; border-radius: 16px; color: #fff; font-size: 0.95rem; width: 100%; outline: none; -webkit-appearance: none; }
         
+        /* Fix for the date picker appearance */
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+
         .btn-prime { background: #fff; color: #000; border: none; padding: 18px; border-radius: 18px; width: 100%; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; }
 
         .list-container { padding-bottom: 280px; }
@@ -83,7 +86,7 @@
         <div style="font-size: 0.6rem; color: var(--dim); margin-bottom: 40px; letter-spacing: 4px; font-weight: 900;">SUBAUDITOR</div>
         <a href="#" onclick="toggleMenu()">Dashboard</a>
         <a href="#" onclick="showRewards()" style="color:var(--success);">Rewards Vault</a>
-        <a href="https://www.instagram.com/tightarsesofmelbourne/" target="_blank" style="font-size: 1.1rem; border: 1px solid var(--accent); padding: 18px; border-radius: 18px; text-align: center;">Melbourne Deals</a>
+        <a href="https://www.instagram.com/tightarsesofmelbourne/" target="_blank" rel="noopener">Melbourne Deals</a>
         <a href="#" onclick="clearAll()" style="color:#ff4d4d; font-size: 0.9rem; margin-top: auto;">System Wipe</a>
         <button onclick="toggleMenu()" style="margin-top:20px; background:none; border:1px solid #fff; color:#fff; padding:15px; border-radius:15px;">CLOSE</button>
     </div>
@@ -91,10 +94,10 @@
     <div class="overlay" id="rewardsModal">
         <h2 style="font-weight: 200; margin-bottom: 25px;">Rewards Vault</h2>
         <div class="reward-grid">
-            <a href="https://app.shopback.com.au/nJknCfOEq0b" target="_blank" class="reward-item"><div><b>ShopBack</b><span>$20 Signup Bonus</span></div><div>→</div></a>
-            <a href="https://mistplay.onelink.me/ZGRQ/34umtqyt" target="_blank" class="reward-item"><div><b>Mistplay</b><span>Game Rewards</span></div><div>→</div></a>
-            <a href="https://crypto.com/app/73p7yuxc93" target="_blank" class="reward-item"><div><b>Crypto.com</b><span>DeFi & Cards</span></div><div>→</div></a>
-            <a href="https://links.thepassapp.com.au/KYyXo1yGq0b" target="_blank" class="reward-item"><div><b>The Pass</b><span>Pub Rewards</span></div><div>→</div></a>
+            <a href="https://app.shopback.com.au/nJknCfOEq0b" target="_blank" rel="noopener" class="reward-item"><div><b>ShopBack</b><span>$20 Signup Bonus</span></div><div>→</div></a>
+            <a href="https://mistplay.onelink.me/ZGRQ/34umtqyt" target="_blank" rel="noopener" class="reward-item"><div><b>Mistplay</b><span>Game Rewards</span></div><div>→</div></a>
+            <a href="https://crypto.com/app/73p7yuxc93" target="_blank" rel="noopener" class="reward-item"><div><b>Crypto.com</b><span>DeFi & Cards</span></div><div>→</div></a>
+            <a href="https://links.thepassapp.com.au/KYyXo1yGq0b" target="_blank" rel="noopener" class="reward-item"><div><b>The Pass</b><span>Pub Rewards</span></div><div>→</div></a>
         </div>
         <button onclick="closeRewards()" style="margin-top:30px; background:none; border:1px solid #fff; color:#fff; padding:20px; border-radius:20px;">RETURN</button>
     </div>
@@ -122,7 +125,7 @@
             <select id="itemCat">
                 <option>Mortgage</option><option>Groceries</option><option>Entertainment</option><option>Utilities</option><option>Fuel</option><option>Other</option>
             </select>
-            <input type="text" value="03/02/2026" disabled style="width:140px; text-align:center; color:var(--dim); font-weight: 600;">
+            <input type="date" id="itemDate" style="width:160px; text-align:center;">
         </div>
         <button class="btn-prime" onclick="addItem()">Log Entry</button>
     </div>
@@ -151,6 +154,9 @@
         let isPrivate = localStorage.getItem('onyx_privacy') === 'true';
         let rate = 1; let sym = '$';
 
+        // Set default date to today
+        document.getElementById('itemDate').valueAsDate = new Date();
+
         function toggleMenu() { document.getElementById('mainMenu').classList.toggle('active'); }
         function showRewards() { toggleMenu(); document.getElementById('rewardsModal').classList.add('active'); }
         function closeRewards() { document.getElementById('rewardsModal').classList.remove('active'); }
@@ -172,9 +178,9 @@
         }
 
         function addItem() {
-            const n = document.getElementById('itemName').value, p = document.getElementById('itemPrice').value, c = document.getElementById('itemCat').value;
+            const n = document.getElementById('itemName').value, p = document.getElementById('itemPrice').value, c = document.getElementById('itemCat').value, d = document.getElementById('itemDate').value;
             if(n && p) { 
-                expenses.unshift({n, p: parseFloat(p)/rate, c, d: "03/02/2026"}); 
+                expenses.unshift({n, p: parseFloat(p)/rate, c, d: d || "No Date"}); 
                 render(); document.getElementById('itemName').value = ''; document.getElementById('itemPrice').value = ''; 
             }
         }
