@@ -1,17 +1,16 @@
 {
   "name": "SubAuditor",
   "short_name": "SubAuditor",
-  "description": "Track your subscriptions and savings goals locally.",
-  "id": "com.subauditor.app",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#05070a",
   "theme_color": "#05070a",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/10307/10307901.png",
+      "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
