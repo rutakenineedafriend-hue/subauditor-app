@@ -1,7 +1,7 @@
 {
   "name": "SubAuditor",
   "short_name": "SubAuditor",
-  "description": "Aussie subscription and spending auditor.",
+  "description": "Manage your Aussie subscriptions and daily spending in one place.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
