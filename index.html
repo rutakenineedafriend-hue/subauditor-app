@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#05070a">
     <title>SubAuditor</title>
+    
     <link rel="manifest" href="/manifest.json">
+    
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg: #05070a; --accent: #00e5ff; --success: #ccff00; --warning: #ff9100; --danger: #ff4d4d;
-            --glass: rgba(255, 255, 255, 0.04); --border: rgba(255, 255, 255, 0.12); --text: #ffffff; --dim: #94a3b8;
+            --bg: #05070a; --accent: #00e5ff; --success: #ccff00; --glass: rgba(255, 255, 255, 0.04);
+            --border: rgba(255, 255, 255, 0.12); --text: #ffffff; --dim: #94a3b8; --danger: #ff4d4d;
         }
 
         body {
@@ -21,166 +23,209 @@
         }
 
         .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .pill-btn { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 8px 16px; font-size: 0.75rem; font-weight: 700; color: var(--accent); cursor: pointer; }
+        .pill-btn { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 8px 16px; font-size: 0.75rem; font-weight: 700; color: var(--accent); cursor: pointer; backdrop-filter: blur(10px); }
 
         .hero-stats { text-align: center; margin-bottom: 30px; cursor: pointer; }
-        .hero-stats h1 { font-size: 5rem; font-weight: 100; margin: 0; letter-spacing: -4px; color: #fff; transition: 0.3s; }
+        .hero-stats h1 { font-size: 5rem; font-weight: 100; margin: 0; letter-spacing: -4px; color: #fff; transition: filter 0.3s; }
         .hero-stats.private h1 { filter: blur(20px); }
 
         .input-deck { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 30px; padding: 22px; backdrop-filter: blur(20px); margin-bottom: 30px; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; }
-        input, select { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); padding: 14px; border-radius: 16px; color: #fff; font-size: 0.95rem; width: 100%; outline: none; }
+        input, select { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); padding: 14px; border-radius: 16px; color: #fff; font-size: 0.95rem; width: 100%; outline: none; -webkit-appearance: none; }
         
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+
         .btn-prime { background: #fff; color: #000; border: none; padding: 18px; border-radius: 18px; width: 100%; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; }
 
         .list-container { padding-bottom: 280px; }
         .entry { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border); }
-        .days-badge { font-size: 0.65rem; font-weight: 800; padding: 4px 8px; border-radius: 8px; background: var(--glass); color: var(--accent); text-transform: uppercase; }
-        .urgent { color: var(--danger) !important; border: 1px solid var(--danger); }
         .price { color: var(--accent); font-weight: 700; font-family: monospace; font-size: 1.15rem; }
-        .del-btn { color: #ff4d4d; font-size: 1.8rem; font-weight: 300; cursor: pointer; padding-left: 15px; }
+        .days-left { font-size: 0.65rem; color: var(--success); font-weight: 800; text-transform: uppercase; margin-right: 8px; border: 1px solid var(--success); padding: 2px 6px; border-radius: 6px; }
+        .del-btn { color: var(--danger); font-size: 1.8rem; font-weight: 300; cursor: pointer; padding: 5px; }
 
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,7,10,0.99); backdrop-filter: blur(30px); z-index: 5000; display: none; flex-direction: column; padding: 40px 20px; box-sizing: border-box; }
         .overlay.active { display: flex; }
         .overlay a { color: #fff; text-decoration: none; font-size: 1.6rem; margin-bottom: 25px; font-weight: 200; }
 
+        .cur-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; overflow-y: auto; }
+        .cur-item { padding: 18px; background: var(--glass); border: 1px solid var(--border); border-radius: 16px; text-align: center; cursor: pointer; }
+
+        .reward-grid { display: grid; gap: 12px; overflow-y: auto; }
+        .reward-item { background: var(--glass); border: 1px solid var(--border); padding: 20px; border-radius: 20px; text-decoration: none; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .reward-item b { display: block; color: var(--success); font-size: 1.1rem; }
+
         .goal-dock { position: fixed; bottom: 20px; left: 15px; right: 15px; background: rgba(10, 15, 25, 0.98); border: 1px solid var(--border); border-radius: 32px; padding: 22px; backdrop-filter: blur(30px); z-index: 100; }
+        .goal-input { border: none; background: none; color: var(--success); font-weight: 800; width: 75px; font-size: 0.75rem; text-align: right; border-bottom: 1px dotted var(--dim); outline: none; }
         #goalBar { height: 6px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--success)); transition: 1.5s; border-radius: 10px; }
     </style>
 </head>
 <body>
 
+    <div class="overlay" id="curOverlay">
+        <h2 style="font-weight: 200; margin-bottom: 20px;">Currencies</h2>
+        <div class="cur-grid">
+            <div class="cur-item" onclick="setCur('AUD', 1, '$')">AUD $</div>
+            <div class="cur-item" onclick="setCur('USD', 0.65, '$')">USD $</div>
+            <div class="cur-item" onclick="setCur('EUR', 0.62, '€')">EUR €</div>
+            <div class="cur-item" onclick="setCur('GBP', 0.52, '£')">GBP £</div>
+            <div class="cur-item" onclick="setCur('JPY', 98.4, '¥')">JPY ¥</div>
+            <div class="cur-item" onclick="setCur('NZD', 1.08, '$')">NZD $</div>
+        </div>
+        <button onclick="closeCur()" style="margin-top:auto; background:none; border:1px solid #fff; color:#fff; padding:20px; border-radius:20px;">RETURN</button>
+    </div>
+
     <div class="overlay" id="mainMenu">
         <div style="font-size: 0.6rem; color: var(--dim); margin-bottom: 40px; letter-spacing: 4px; font-weight: 900;">SUBAUDITOR</div>
         <a href="#" onclick="toggleMenu()">Dashboard</a>
+        <a href="#" onclick="showRewards()" style="color:var(--success);">Rewards Vault</a>
         <a href="https://www.instagram.com/tightarsesofmelbourne/" target="_blank">Melbourne Deals</a>
         <a href="#" onclick="clearAll()" style="color:var(--danger); font-size: 0.9rem; margin-top: auto;">System Wipe</a>
         <button onclick="toggleMenu()" style="margin-top:20px; background:none; border:1px solid #fff; color:#fff; padding:15px; border-radius:15px;">CLOSE</button>
     </div>
 
+    <div class="overlay" id="rewardsModal">
+        <h2 style="font-weight: 200; margin-bottom: 25px;">Rewards Vault</h2>
+        <div class="reward-grid">
+            <a href="https://app.shopback.com.au/nJknCfOEq0b" target="_blank" rel="noopener" class="reward-item"><div><b>ShopBack</b><span>$20 Signup Bonus</span></div><div>→</div></a>
+            <a href="https://mistplay.onelink.me/ZGRQ/34umtqyt" target="_blank" rel="noopener" class="reward-item"><div><b>Mistplay</b><span>Game Rewards</span></div><div>→</div></a>
+            <a href="https://crypto.com/app/73p7yuxc93" target="_blank" rel="noopener" class="reward-item"><div><b>Crypto.com</b><span>DeFi & Cards</span></div><div>→</div></a>
+            <a href="https://links.thepassapp.com.au/KYyXo1yGq0b" target="_blank" rel="noopener" class="reward-item"><div><b>The Pass</b><span>Pub Rewards</span></div><div>→</div></a>
+        </div>
+        <button onclick="closeRewards()" style="margin-top:30px; background:none; border:1px solid #fff; color:#fff; padding:20px; border-radius:20px;">RETURN</button>
+    </div>
+
     <div class="nav-bar">
-        <div class="pill-btn" onclick="togglePrivacy()">Privacy Mode</div>
+        <div class="pill-btn" id="curBtn" onclick="openCur()">AUD ($)</div>
         <div onclick="toggleMenu();" style="cursor:pointer; padding: 10px;">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>
         </div>
     </div>
 
-    <div class="hero-stats" id="mainDisplay">
-        <div style="font-size: 0.65rem; color: var(--dim); text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">Monthly Outflow</div>
+    <div class="hero-stats" id="mainDisplay" onclick="togglePrivacy()">
+        <div style="font-size: 0.65rem; color: var(--dim); text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">Total Outflow</div>
         <h1 id="total">$0</h1>
     </div>
 
     <div class="input-deck">
+        <div class="row"><input type="text" id="itemName" placeholder="What did you pay?"><input type="number" id="itemPrice" placeholder="0.00" style="width: 110px;"></div>
         <div class="row">
-            <input type="text" id="subName" placeholder="Subscription (e.g. Netflix)">
-            <input type="number" id="subPrice" placeholder="0.00" style="width: 100px;">
-        </div>
-        <div class="row">
-            <select id="subCycle">
-                <option value="1">Monthly</option>
-                <option value="12">Yearly</option>
+            <select id="itemCat">
+                <option value="Mortgage">Mortgage</option>
+                <option value="Groceries">Groceries</option>
+                <option value="Subscription">Subscription</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Fuel">Fuel</option>
+                <option value="Other">Other</option>
             </select>
-            <input type="date" id="subDate" style="width: 160px;">
+            <input type="date" id="itemDate" style="width:160px;">
         </div>
-        <button class="btn-prime" onclick="addSub()">Add Subscription</button>
+        <button class="btn-prime" onclick="addItem()">Log Entry</button>
     </div>
 
-    <div class="list-container" id="subList"></div>
+    <div class="list-container" id="expenseList"></div>
 
     <div class="goal-dock">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <div style="font-size:0.75rem; font-weight:900; color:var(--success);">SAVINGS GOAL</div>
-            <span id="goalPercent" style="font-size:0.85rem; font-weight:900; color:var(--success);">0%</span>
+            <div style="text-align: right;">
+                <span id="goalPercent" style="font-size:0.85rem; font-weight:900; color:var(--success);">0%</span>
+                <div style="font-size:0.6rem; color:var(--dim);"><span id="symSaved">$</span><span id="curSavedDisp">0</span> / <span id="symTarget">$</span><input type="number" id="goalTarget" value="2000" onchange="updateGoalFromInput()" class="goal-input"></div>
+            </div>
         </div>
         <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); margin-bottom: 18px; border-radius: 10px; overflow: hidden;"><div id="goalBar"></div></div>
         <div style="display: flex; gap: 12px;">
             <input type="number" id="depAmt" placeholder="Log savings...">
-            <button onclick="addDep()" style="background:#fff; border:none; color:#000; padding: 0 25px; border-radius: 16px; font-weight: 900;">ADD</button>
+            <button onclick="addDep()" style="background:#fff; border:none; color:#000; padding: 0 30px; border-radius: 16px; font-weight: 900; font-size: 0.8rem; cursor:pointer;">ADD</button>
         </div>
     </div>
 
     <script>
-        let subs = JSON.parse(localStorage.getItem('sub_data') || '[]');
-        let saved = parseFloat(localStorage.getItem('sub_saved') || '0');
-        let goal = 2000;
-        let isPrivate = false;
+        let expenses = JSON.parse(localStorage.getItem('sub_exp') || '[]');
+        let savedBase = parseFloat(localStorage.getItem('sub_sav') || '0');
+        let goalBase = parseFloat(localStorage.getItem('sub_goal') || '2000');
+        let isPrivate = localStorage.getItem('sub_priv') === 'true';
+        let rate = 1; let sym = '$';
 
-        document.getElementById('subDate').valueAsDate = new Date();
+        document.getElementById('itemDate').valueAsDate = new Date();
 
         function toggleMenu() { document.getElementById('mainMenu').classList.toggle('active'); }
-        function togglePrivacy() { isPrivate = !isPrivate; document.getElementById('mainDisplay').classList.toggle('private', isPrivate); }
+        function showRewards() { toggleMenu(); document.getElementById('rewardsModal').classList.add('active'); }
+        function closeRewards() { document.getElementById('rewardsModal').classList.remove('active'); }
+        function openCur() { document.getElementById('curOverlay').classList.add('active'); }
+        function closeCur() { document.getElementById('curOverlay').classList.remove('active'); }
 
-        function addSub() {
-            const name = document.getElementById('subName').value;
-            const price = document.getElementById('subPrice').value;
-            const cycle = document.getElementById('subCycle').value;
-            const date = document.getElementById('subDate').value;
-
-            if(name && price) {
-                subs.push({ name, price: parseFloat(price), cycle, date });
-                render();
-                document.getElementById('subName').value = '';
-                document.getElementById('subPrice').value = '';
-            }
+        function togglePrivacy() {
+            isPrivate = !isPrivate;
+            localStorage.setItem('sub_priv', isPrivate);
+            document.getElementById('mainDisplay').classList.toggle('private', isPrivate);
         }
 
-        function getDaysLeft(dateStr, cycle) {
-            const next = new Date(dateStr);
+        function setCur(label, r, s) {
+            rate = r; sym = s;
+            document.getElementById('curBtn').innerText = `${label} (${s})`;
+            document.getElementById('symSaved').innerText = s;
+            document.getElementById('symTarget').innerText = s;
+            closeCur(); render(); updateGoal();
+        }
+
+        function getDaysLeft(dateStr) {
+            const billDate = new Date(dateStr);
             const today = new Date();
-            while (next < today) {
-                next.setMonth(next.getMonth() + parseInt(cycle));
+            // Move date to current/next month
+            billDate.setFullYear(today.getFullYear());
+            billDate.setMonth(today.getMonth());
+            if (billDate < today) billDate.setMonth(billDate.getMonth() + 1);
+            return Math.ceil((billDate - today) / (1000 * 60 * 60 * 24));
+        }
+
+        function addItem() {
+            const n = document.getElementById('itemName').value, p = document.getElementById('itemPrice').value, c = document.getElementById('itemCat').value, d = document.getElementById('itemDate').value;
+            if(n && p) { 
+                expenses.unshift({n, p: parseFloat(p)/rate, c, d}); 
+                render(); document.getElementById('itemName').value = ''; document.getElementById('itemPrice').value = ''; 
             }
-            return Math.ceil((next - today) / (1000 * 60 * 60 * 24));
         }
 
         function render() {
-            const list = document.getElementById('subList');
-            let total = 0;
-            list.innerHTML = '';
-
-            // Sort by days left
-            subs.sort((a, b) => getDaysLeft(a.date, a.cycle) - getDaysLeft(b.date, b.cycle));
-
-            subs.forEach((s, i) => {
-                const days = getDaysLeft(s.date, s.cycle);
-                const monthlyPrice = s.cycle == "12" ? s.price / 12 : s.price;
-                total += monthlyPrice;
-
-                const urgentClass = days <= 3 ? 'urgent' : '';
-
-                list.innerHTML += `
-                    <div class="entry">
-                        <div>
-                            <b>${s.name}</b><br>
-                            <span class="days-badge ${urgentClass}">${days} Days Left</span>
-                        </div>
-                        <div style="display:flex; align-items:center;">
-                            <span class="price">$${s.price.toFixed(2)}</span>
-                            <span class="del-btn" onclick="deleteSub(${i})">×</span>
-                        </div>
-                    </div>`;
+            const list = document.getElementById('expenseList'); let total = 0; list.innerHTML = '';
+            expenses.forEach((item, i) => {
+                total += item.p;
+                let subBadge = '';
+                if(item.c === "Subscription") {
+                    const days = getDaysLeft(item.d);
+                    subBadge = `<span class="days-left">${days}d Left</span>`;
+                }
+                list.innerHTML += `<div class="entry"><div><b>${item.n}</b><br><span style="font-size:0.7rem;color:var(--dim)">${item.d} • ${item.c}</span></div><div style="display:flex;align-items:center;">${subBadge}<span class="price">${sym}${(item.p * rate).toFixed(2)}</span><span class="del-btn" onclick="deleteItem(${i})">×</span></div></div>`;
             });
-
-            document.getElementById('total').innerText = `$${total.toFixed(0)}`;
-            localStorage.setItem('sub_data', JSON.stringify(subs));
-            updateGoal();
+            document.getElementById('total').innerText = `${sym}${(total * rate).toFixed(0)}`;
+            localStorage.setItem('sub_exp', JSON.stringify(expenses));
+            if(isPrivate) document.getElementById('mainDisplay').classList.add('private');
         }
 
-        function deleteSub(i) { subs.splice(i, 1); render(); }
+        function deleteItem(i) { if(confirm("Remove?")) { expenses.splice(i, 1); render(); } }
 
         function addDep() {
             const amt = parseFloat(document.getElementById('depAmt').value);
-            if(amt) { saved += amt; localStorage.setItem('sub_saved', saved); document.getElementById('depAmt').value = ''; updateGoal(); }
+            if (amt > 0) { savedBase += (amt / rate); localStorage.setItem('sub_sav', savedBase); document.getElementById('depAmt').value = ''; updateGoal(true); }
         }
 
-        function updateGoal() {
-            const p = Math.min((saved / goal) * 100, 100);
-            document.getElementById('goalPercent').innerText = Math.floor(p) + '%';
-            document.getElementById('goalBar').style.width = p + '%';
+        function updateGoalFromInput() {
+            goalBase = parseFloat(document.getElementById('goalTarget').value) / rate;
+            localStorage.setItem('sub_goal', goalBase);
+            updateGoal();
         }
 
-        function clearAll() { if(confirm("Wipe all data?")) { localStorage.clear(); location.reload(); } }
-        window.onload = render;
+        function updateGoal(isNewAdd = false) {
+            const percent = Math.min((savedBase / goalBase) * 100, 100);
+            document.getElementById('goalTarget').value = (goalBase * rate).toFixed(0);
+            document.getElementById('curSavedDisp').innerText = (savedBase * rate).toFixed(0);
+            document.getElementById('goalPercent').innerText = Math.floor(percent) + '%';
+            document.getElementById('goalBar').style.width = percent + '%';
+            if(percent >= 100 && isNewAdd) confetti({particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#00e5ff', '#ccff00']});
+        }
+
+        function clearAll() { if(confirm("System Wipe?")) { localStorage.clear(); location.reload(); } }
+        window.onload = () => { render(); updateGoal(); };
     </script>
 </body>
 </html>
