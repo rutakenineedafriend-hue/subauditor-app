@@ -1,23 +1,10 @@
 {
   "name": "SubAuditor",
   "short_name": "SubAuditor",
-  "description": "Manage and audit your subscriptions and daily spending.",
+  "description": "Subscription and spending auditor.",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#05070a",
-  "theme_color": "#05070a",
-  "icons": [
-    {
-      "src": "1770071586955.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "1770071586955.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ]
+  "theme_color": "#05070a"
 }
