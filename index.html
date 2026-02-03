@@ -6,8 +6,6 @@
     <meta name="theme-color" content="#05070a">
     <title>SubAuditor</title>
     
-    <link rel="manifest" href="manifest.json">
-    
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -167,6 +165,7 @@
                 expenses.unshift({n, p: parseFloat(p)/rate, c, d, isSub: (currentTab === 'subs')});
                 render();
                 document.getElementById('itemName').value = ''; document.getElementById('itemPrice').value = '';
+                if (typeof confetti !== 'undefined') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#00e5ff', '#ccff00'] });
             }
         }
 
@@ -198,8 +197,4 @@
             if (idx > -1) { expenses.splice(idx, 1); render(); }
         }
 
-        function clearAll() { if(confirm("Clear All?")) { localStorage.clear(); location.reload(); } }
-        window.onload = render;
-    </script>
-</body>
-</html>
+        function clear
